@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+.expo/
+
+# Build output
+dist/
+build/
+
+# Environment
+.env.local
+.env.production.local
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*

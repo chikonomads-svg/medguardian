@@ -1,0 +1,9 @@
+# Backend
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+websockets>=12.0
+python-dotenv>=1.0.0
+pydantic>=2.6.0
+
+# Frontend (via npm — see FE/package.json)
+# react-native / expo / @react-navigation / expo-linear-gradient / ...
