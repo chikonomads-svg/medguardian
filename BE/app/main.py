@@ -4,10 +4,16 @@ Runs at: http://localhost:8000
 Docs  at: http://localhost:8000/docs
 WebSocket: ws://localhost:8000/ws/incident/{incident_id}
 """
+import os
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
+
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import sos, iru, incident, legal, media, community, profile
+from app.routes import news, legal_chat
 from app.websocket.incident_ws import stream_incident_updates
 
 app = FastAPI(
@@ -17,7 +23,7 @@ app = FastAPI(
         "Emergency SOS → IRU Dispatch → Legal Support → Media Management\n\n"
         "**V1: In-memory simulation mode**"
     ),
-    version="1.0.0",
+    version="1.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -43,6 +49,8 @@ app.include_router(legal.router)
 app.include_router(media.router)
 app.include_router(community.router)
 app.include_router(profile.router)
+app.include_router(news.router)
+app.include_router(legal_chat.router)
 
 # ---------------------------------------------------------------------------
 # WebSocket endpoint

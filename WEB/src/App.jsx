@@ -1,4 +1,4 @@
-// MedGuardian — App Root (Responsive Web + Mobile)
+// MedGuardian — App Root (Responsive Web + Mobile) v1.1
 import React, { useState } from 'react';
 import { SOSProvider, useSOS } from './context/SOSContext';
 import SplashScreen from './screens/SplashScreen';
@@ -7,17 +7,17 @@ import LoginScreen from './screens/LoginScreen';
 import MainDashboard from './screens/MainDashboard';
 import SOSActivation from './screens/SOSActivation';
 import EmergencyActive from './screens/EmergencyActive';
-import IRUTracking from './screens/IRUTracking';
+import LegalChatbot from './screens/LegalChatbot';
 import LegalSupport from './screens/LegalSupport';
-import MediaSupport from './screens/MediaSupport';
+import NewsScreen from './screens/NewsScreen';
 import CommunityHub from './screens/CommunityHub';
 import ProfileScreen from './screens/ProfileScreen';
 
 const TABS = [
     { key: 'dashboard', icon: '🛡️', label: 'Shield' },
-    { key: 'iru', icon: '🚨', label: 'IRU' },
-    { key: 'legal', icon: '⚖️', label: 'Legal' },
-    { key: 'media', icon: '📢', label: 'Media' },
+    { key: 'legalchat', icon: '⚖️', label: 'Legal AI' },
+    { key: 'legal', icon: '📋', label: 'Legal' },
+    { key: 'news', icon: '📰', label: 'News' },
     { key: 'community', icon: '🤝', label: 'Community' },
     { key: 'profile', icon: '👤', label: 'Profile' },
 ];
@@ -58,17 +58,12 @@ function AppInner() {
         <div className="app-wrapper">
             <div className="app-shell">
                 <EmergencyActive
-                    onViewIRU={() => setScreen('iru-emergency')}
+                    onViewIRU={() => setScreen('legal-emergency')}
                     onViewLegal={() => setScreen('legal-emergency')}
                     onCancel={handleCancelSOS}
                     onResolved={handleResolved}
                 />
             </div>
-        </div>
-    );
-    if (screen === 'iru-emergency') return (
-        <div className="app-wrapper">
-            <div className="app-shell"><IRUTracking onBack={() => setScreen('emergency')} /></div>
         </div>
     );
     if (screen === 'legal-emergency') return (
@@ -106,7 +101,7 @@ function AppInner() {
                 </nav>
 
                 <div className="sidebar-footer">
-                    <p>MedGuardian v1.0</p>
+                    <p>MedGuardian v1.1</p>
                     <p style={{ marginTop: 4 }}>MedShield™ Active</p>
                 </div>
             </aside>
@@ -115,9 +110,9 @@ function AppInner() {
             <div className="app-shell">
                 <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                     {tab === 'dashboard' && <MainDashboard onSOS={handleSOS} />}
-                    {tab === 'iru' && <IRUTracking />}
+                    {tab === 'legalchat' && <LegalChatbot />}
                     {tab === 'legal' && <LegalSupport />}
-                    {tab === 'media' && <MediaSupport />}
+                    {tab === 'news' && <NewsScreen />}
                     {tab === 'community' && <CommunityHub />}
                     {tab === 'profile' && <ProfileScreen onLogout={handleLogout} />}
                 </div>
