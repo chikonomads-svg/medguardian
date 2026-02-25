@@ -13,7 +13,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import sos, iru, incident, legal, media, community, profile
-from app.routes import news, legal_chat
+from app.routes import news, legal_chat, auth
 from app.websocket.incident_ws import stream_incident_updates
 
 app = FastAPI(
@@ -51,6 +51,7 @@ app.include_router(community.router)
 app.include_router(profile.router)
 app.include_router(news.router)
 app.include_router(legal_chat.router)
+app.include_router(auth.router)
 
 # ---------------------------------------------------------------------------
 # WebSocket endpoint
