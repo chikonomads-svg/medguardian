@@ -1,12 +1,13 @@
-// News Screen — Bihar / Muzaffarpur Medical News (Tavily)
+// News Screen — Bihar/Muzaffarpur + India + World Medical News
 import React, { useState, useEffect } from 'react';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export default function NewsScreen() {
-    const [articles, setArticles] = useState([]);
+    const [sections, setSections] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [activeSection, setActiveSection] = useState(0); // 0 = all
 
     useEffect(() => { fetchNews(); }, []);
 
@@ -15,19 +16,41 @@ export default function NewsScreen() {
         try {
             const res = await fetch(`${API}/news/feed`);
             const data = await res.json();
-            setArticles(data.results || []);
+            setSections(data.sections || []);
             setError(data.error || null);
-        } catch (e) {
+        } catch {
             setError('Failed to connect to news service');
-            // Fallback
-            setArticles([
-                { title: 'Bihar Health Department Announces New Safety Protocol for Doctors', url: '#', snippet: 'The Bihar Health Department has introduced new safety measures for healthcare workers across all government hospitals...', source: 'biharhealth.gov.in' },
-                { title: 'Muzaffarpur Medical College Upgrades Emergency Response', url: '#', snippet: 'SKMCH Muzaffarpur has implemented a rapid response system for doctor safety following recent incidents...', source: 'timesofindia.com' },
-                { title: 'IMA Bihar Chapter Demands Stricter Laws Against Violence on Doctors', url: '#', snippet: 'The Indian Medical Association Bihar chapter has demanded stricter enforcement of the Medical Protection Act...', source: 'ndtv.com' },
+            setSections([
+                {
+                    label: '🏥 Bihar & Muzaffarpur', results: [
+                        { title: 'Bihar Doctor Safety: New Protocols Announced', url: '#', snippet: 'New safety measures introduced for healthcare workers across Bihar hospitals...', source: 'biharhealth.gov.in' },
+                    ]
+                },
+                {
+                    label: '🇮🇳 India Medical News', results: [
+                        { title: 'IMA Demands Stricter Laws Against Doctor Violence', url: '#', snippet: 'Indian Medical Association demands nationwide enforcement of medical protection laws...', source: 'ndtv.com' },
+                    ]
+                },
+                {
+                    label: '🌍 World Health News', results: [
+                        { title: 'WHO: Healthcare Worker Safety a Global Priority', url: '#', snippet: 'WHO highlights increasing global concern over violence against healthcare workers...', source: 'who.int' },
+                    ]
+                },
             ]);
         }
         setLoading(false);
     }
+
+    function shortSummary(snippet) {
+        if (!snippet) return '';
+        const s = snippet.split(/[.!?]/)[0];
+        return s.length > 100 ? s.slice(0, 97) + '...' : s + '.';
+    }
+
+    const SECTION_TABS = ['📋 All', ...sections.map(s => s.label)];
+    const visibleSections = activeSection === 0
+        ? sections
+        : [sections[activeSection - 1]].filter(Boolean);
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--p-bg)' }}>
@@ -35,7 +58,7 @@ export default function NewsScreen() {
                 <div className="flex-between">
                     <div>
                         <h2 style={{ fontSize: 22, fontWeight: 800 }}>📰 Medical News</h2>
-                        <p className="text-sub" style={{ fontSize: 12, marginTop: 2 }}>Bihar & Muzaffarpur Healthcare Updates</p>
+                        <p className="text-sub" style={{ fontSize: 12, marginTop: 2 }}>Bihar · India · World</p>
                     </div>
                     <button onClick={fetchNews} className="btn btn-outline" style={{ padding: '8px 14px', fontSize: 13 }}>
                         🔄 Refresh
@@ -44,28 +67,32 @@ export default function NewsScreen() {
             </div>
 
             <div className="screen" style={{ padding: '16px 20px' }}>
-                {/* Region Tags */}
-                <div className="flex-row" style={{ gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-                    {['Bihar', 'Muzaffarpur', 'Healthcare', 'Medical Safety'].map(tag => (
-                        <span key={tag} style={{
-                            padding: '5px 12px', borderRadius: 100, fontSize: 11, fontWeight: 700,
-                            background: 'rgba(37,99,235,0.12)', color: 'var(--p-accent)', border: '1px solid rgba(37,99,235,0.3)'
-                        }}>
-                            {tag}
-                        </span>
-                    ))}
-                </div>
+                {/* Section Tabs */}
+                {!loading && sections.length > 0 && (
+                    <div className="flex-row" style={{ gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+                        {SECTION_TABS.map((tab, i) => (
+                            <button key={tab} onClick={() => setActiveSection(i)} style={{
+                                padding: '6px 14px', borderRadius: 100, fontSize: 11, fontWeight: 700,
+                                cursor: 'pointer', border: 'none', fontFamily: 'Inter', transition: 'all 0.2s',
+                                background: activeSection === i ? 'var(--p-accent)' : 'rgba(37,99,235,0.12)',
+                                color: activeSection === i ? '#fff' : 'var(--p-accent)',
+                            }}>
+                                {tab}
+                            </button>
+                        ))}
+                    </div>
+                )}
 
                 {loading && (
                     <div style={{ textAlign: 'center', padding: 40 }}>
                         {[1, 2, 3].map(i => (
                             <div key={i} className="glass-card" style={{
-                                marginBottom: 12, height: 100,
+                                marginBottom: 12, height: 90,
                                 background: 'linear-gradient(90deg, var(--p-card) 25%, var(--p-border) 50%, var(--p-card) 75%)',
                                 backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite'
                             }} />
                         ))}
-                        <p className="text-sub" style={{ marginTop: 16 }}>Fetching latest news from Bihar...</p>
+                        <p className="text-sub" style={{ marginTop: 16 }}>Fetching news...</p>
                     </div>
                 )}
 
@@ -75,38 +102,47 @@ export default function NewsScreen() {
                     </div>
                 )}
 
-                {!loading && articles.map((article, i) => (
-                    <a key={i} href={article.url} target="_blank" rel="noopener noreferrer"
-                        style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-                        <div className="glass-card fade-in-up" style={{ marginBottom: 14, cursor: 'pointer' }}>
-                            <div className="flex-between" style={{ marginBottom: 8, alignItems: 'flex-start' }}>
-                                <h3 style={{ fontSize: 15, fontWeight: 700, flex: 1, marginRight: 12, lineHeight: 1.4 }}>
-                                    {article.title}
-                                </h3>
-                                <span style={{ fontSize: 18, flexShrink: 0 }}>↗</span>
-                            </div>
-                            <p className="text-sub" style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 10 }}>
-                                {article.snippet}
-                            </p>
-                            <div className="flex-row" style={{ gap: 8 }}>
-                                <span style={{
-                                    padding: '3px 8px', borderRadius: 100, fontSize: 10, fontWeight: 700,
-                                    background: 'rgba(16,185,129,0.12)', color: 'var(--p-success)'
-                                }}>
-                                    🌐 {article.source}
-                                </span>
-                            </div>
+                {!loading && visibleSections.map((section, si) => (
+                    <div key={si} style={{ marginBottom: 24 }}>
+                        {/* Section Header */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                            <h3 style={{ fontSize: 16, fontWeight: 800, flex: 1 }}>{section.label}</h3>
+                            <span className="text-muted" style={{ fontSize: 11 }}>{section.results?.length || 0} articles</span>
                         </div>
-                    </a>
-                ))}
 
-                {!loading && articles.length === 0 && (
-                    <div className="glass-card" style={{ textAlign: 'center', padding: 40 }}>
-                        <span style={{ fontSize: 48 }}>📰</span>
-                        <p style={{ fontWeight: 700, fontSize: 16, marginTop: 12 }}>No news available</p>
-                        <p className="text-sub" style={{ fontSize: 13, marginTop: 4 }}>Try refreshing in a moment</p>
+                        {section.results?.map((article, i) => (
+                            <a key={i} href={article.url} target="_blank" rel="noopener noreferrer"
+                                style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                                <div className="glass-card fade-in-up" style={{ marginBottom: 12, cursor: 'pointer' }}>
+                                    <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--p-accent)', marginBottom: 6, letterSpacing: 0.3 }}>
+                                        {shortSummary(article.snippet)}
+                                    </p>
+                                    <div className="flex-between" style={{ marginBottom: 6, alignItems: 'flex-start' }}>
+                                        <h4 style={{ fontSize: 14, fontWeight: 700, flex: 1, marginRight: 12, lineHeight: 1.4 }}>
+                                            {article.title}
+                                        </h4>
+                                        <span style={{ fontSize: 16, flexShrink: 0, opacity: 0.5 }}>↗</span>
+                                    </div>
+                                    <p className="text-sub" style={{ fontSize: 12, lineHeight: 1.5, marginBottom: 8 }}>
+                                        {article.snippet}
+                                    </p>
+                                    <span style={{
+                                        padding: '3px 8px', borderRadius: 100, fontSize: 10, fontWeight: 700,
+                                        background: 'rgba(16,185,129,0.12)', color: 'var(--p-success)'
+                                    }}>
+                                        🌐 {article.source}
+                                    </span>
+                                </div>
+                            </a>
+                        ))}
+
+                        {(!section.results || section.results.length === 0) && (
+                            <div className="glass-card" style={{ textAlign: 'center', padding: 24 }}>
+                                <p className="text-sub" style={{ fontSize: 13 }}>No articles in this category</p>
+                            </div>
+                        )}
                     </div>
-                )}
+                ))}
             </div>
         </div>
     );
