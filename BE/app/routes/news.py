@@ -44,6 +44,7 @@ async def _search(client, api_key, query, max_results):
                 "snippet": item.get("content", "")[:300],
                 "source": item.get("url", "").split("/")[2] if "/" in item.get("url", "") else "",
                 "score": item.get("score", 0),
+                "published_date": item.get("published_date", ""),
             })
         return results
     except Exception:
